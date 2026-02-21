@@ -5,9 +5,9 @@ extends Control
 @onready var game_container: VBoxContainer = %GameContainer
 @onready var name_input: LineEdit = %NameInput
 @onready var join_button: Button = %JoinButton
-@onready var black_card_label: Label = %BlackCardLabel
-@onready var hand_container: GridContainer = %HandContainer
-@onready var submissions_container: GridContainer = %SubmissionsContainer
+@onready var black_card_label = %BlackCardLabel
+@onready var hand_container = %HandContainer
+@onready var submissions_container = %SubmissionsContainer
 @onready var player_list: ItemList = %PlayerList
 @onready var status_label: Label = %StatusLabel
 @onready var start_button: Button = %StartButton
@@ -42,13 +42,138 @@ func _ready():
     btn_player.pressed.connect(_on_quick_player)
     login_container.add_child(btn_player)
     
-    # Stylize black card
+    _setup_visuals()
+
+func _setup_visuals():
+    # 1. Background & Root
+    set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    var bg = ColorRect.new()
+    bg.color = Color("#2C3E50")
+    bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    add_child(bg)
+    move_child(bg, 0)
+    
+    if game_container:
+        game_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    
+    # 2. Side-by-Side Layout
+    var main_split = HBoxContainer.new()
+    main_split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    main_split.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    main_split.add_theme_constant_override("separation", 20)
+    
+    # Replace BlackCardLabel with RichTextLabel
+    if black_card_label.get_parent():
+        black_card_label.get_parent().remove_child(black_card_label)
+    black_card_label.queue_free()
+    
+    black_card_label = RichTextLabel.new()
+    black_card_label.name = "BlackCardRTL"
+    black_card_label.bbcode_enabled = true
+    black_card_label.scroll_active = false
+    black_card_label.custom_minimum_size = Vector2(280, 380)
+    black_card_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+    black_card_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+    # RTL Styling
     var sb = StyleBoxFlat.new()
     sb.bg_color = Color.BLACK
-    sb.content_margin_left = 20
-    sb.content_margin_right = 20
+    sb.corner_radius_top_left = 15
+    sb.corner_radius_top_right = 15
+    sb.corner_radius_bottom_left = 15
+    sb.corner_radius_bottom_right = 15
+    sb.content_margin_left = 30
+    sb.content_margin_right = 30
+    sb.content_margin_top = 40 # Top padding to center vertically somewhat
+    sb.content_margin_bottom = 30
+    sb.shadow_color = Color(0,0,0,0.5)
+    sb.shadow_size = 8
+    
     black_card_label.add_theme_stylebox_override("normal", sb)
-    black_card_label.add_theme_color_override("font_color", Color.WHITE)
+    black_card_label.add_theme_color_override("default_color", Color.WHITE)
+    black_card_label.add_theme_font_size_override("normal_font_size", 22)
+    black_card_label.text = "[center]Waiting for game...[/center]"
+
+    # Left Side
+    var left_side = CenterContainer.new()
+    left_side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    left_side.size_flags_stretch_ratio = 0.35
+    left_side.add_child(black_card_label)
+    main_split.add_child(left_side)
+    
+    # Right Side
+    var right_side = VBoxContainer.new()
+    right_side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    right_side.size_flags_stretch_ratio = 0.65
+    right_side.alignment = BoxContainer.ALIGNMENT_CENTER
+    main_split.add_child(right_side)
+    
+    # Submissions
+    var lbl_sub = Label.new()
+    lbl_sub.text = "Submissions:"
+    lbl_sub.add_theme_font_size_override("font_size", 16)
+    right_side.add_child(lbl_sub)
+    
+    if submissions_container and is_instance_valid(submissions_container):
+        submissions_container.queue_free()
+    
+    submissions_container = HBoxContainer.new()
+    submissions_container.add_theme_constant_override("separation", 15)
+    
+    var scroll_sub = ScrollContainer.new()
+    scroll_sub.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    scroll_sub.size_flags_stretch_ratio = 0.4
+    scroll_sub.custom_minimum_size.y = 240
+    scroll_sub.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+    scroll_sub.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+    scroll_sub.add_child(submissions_container)
+    right_side.add_child(scroll_sub)
+    
+    # Hand (No Scroll, Overlap)
+    var lbl_hand = Label.new()
+    lbl_hand.text = "Your Hand:"
+    lbl_hand.add_theme_font_size_override("font_size", 16)
+    right_side.add_child(lbl_hand)
+    
+    if hand_container and is_instance_valid(hand_container):
+        hand_container.queue_free()
+    
+    hand_container = HBoxContainer.new()
+    hand_container.name = "HandHBox"
+    hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
+    # Negative separation for overlap
+    hand_container.add_theme_constant_override("separation", -60)
+    
+    # Wrapper for hand to center vertically in its space
+    var hand_wrapper = CenterContainer.new()
+    hand_wrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    hand_wrapper.size_flags_stretch_ratio = 0.6
+    hand_wrapper.add_child(hand_container)
+    right_side.add_child(hand_wrapper)
+    
+    # Clean up and Add
+    for child in game_container.get_children():
+        if child != main_split:
+            game_container.remove_child(child)
+    game_container.add_child(main_split)
+
+func get_card_style(bg_color: Color) -> StyleBoxFlat:
+    var sb = StyleBoxFlat.new()
+    sb.bg_color = bg_color
+    sb.corner_radius_top_left = 12
+    sb.corner_radius_top_right = 12
+    sb.corner_radius_bottom_left = 12
+    sb.corner_radius_bottom_right = 12
+    sb.shadow_color = Color(0,0,0,0.3)
+    sb.shadow_size = 4
+    sb.border_width_bottom = 2
+    sb.border_width_right = 2
+    sb.border_color = Color(0,0,0,0.1)
+    sb.content_margin_left = 15
+    sb.content_margin_right = 15
+    sb.content_margin_top = 15
+    sb.content_margin_bottom = 15
+    return sb
 
 func _process(_delta):
     ws.poll()
@@ -122,9 +247,9 @@ func update_game_state(state: Dictionary):
         selected_indices.clear()
 
     if bc:
-        black_card_label.text = bc.get("text")
+        black_card_label.text = "[center]" + bc.get("text") + "[/center]"
     else:
-        black_card_label.text = "Waiting for game to start..."
+        black_card_label.text = "[center]Waiting for game to start...[/center]"
         
     my_hand = state.get("hand", [])
     is_czar = state.get("is_czar", false)
@@ -161,6 +286,8 @@ func _on_card_selected(index: int):
         selected_indices.clear()
     else:
         print_log("Selected " + str(selected_indices.size()) + "/" + str(num_gaps))
+    
+    render_hand()
 
 func render_hand():
     for child in hand_container.get_children():
@@ -170,32 +297,56 @@ func render_hand():
         var l = Label.new()
         l.text = "You are the Czar! Wait for others to submit."
         l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-        l.size_flags_horizontal = SIZE_EXPAND_FILL
+        l.add_theme_font_size_override("font_size", 18)
         hand_container.add_child(l)
         return
 
     for i in range(my_hand.size()):
         var card = my_hand[i]
+        
+        # Wrapper for overlap effect
+        var wrapper = Control.new()
+        wrapper.custom_minimum_size = Vector2(100, 220) # Narrower than card
+        wrapper.mouse_filter = Control.MOUSE_FILTER_PASS
+        
         var btn = Button.new()
         btn.text = card.get("text")
-        btn.custom_minimum_size = Vector2(160, 100) # Shorter cards to fit grid
+        btn.custom_minimum_size = Vector2(160, 220)
         btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-        btn.add_theme_font_size_override("font_size", 11)
+        btn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+        btn.add_theme_font_size_override("font_size", 14)
         
-        # Stylize white card
-        var sb = StyleBoxFlat.new()
-        sb.bg_color = Color.WHITE
-        sb.set_border_width_all(1)
-        sb.border_color = Color.GRAY
-        btn.add_theme_stylebox_override("normal", sb)
-        btn.add_theme_stylebox_override("hover", sb)
-        btn.add_theme_stylebox_override("pressed", sb)
+        # Determine Style
+        var is_selected = i in selected_indices
+        var bg_color = Color.WHITE
+        if is_selected:
+            bg_color = Color("#ECF0F1")
+            
+        var style_normal = get_card_style(bg_color)
+        if is_selected:
+            style_normal.border_color = Color("#3498DB")
+            style_normal.border_width_left = 3
+            style_normal.border_width_top = 3
+            style_normal.border_width_right = 3
+            style_normal.border_width_bottom = 3
+            
+        var style_hover = get_card_style(Color("#F5F5F5"))
+        var style_pressed = get_card_style(Color("#BDC3C7"))
+        
+        btn.add_theme_stylebox_override("normal", style_normal)
+        btn.add_theme_stylebox_override("hover", style_hover)
+        btn.add_theme_stylebox_override("pressed", style_pressed)
+        
         btn.add_theme_color_override("font_color", Color.BLACK)
         btn.add_theme_color_override("font_hover_color", Color.BLACK)
-        btn.add_theme_color_override("font_pressed_color", Color.DARK_GRAY)
+        btn.add_theme_color_override("font_pressed_color", Color.BLACK)
         
         btn.pressed.connect(_on_card_selected.bind(i))
-        hand_container.add_child(btn)
+        btn.mouse_entered.connect(_on_card_hover.bind(btn))
+        btn.mouse_exited.connect(_on_card_exit.bind(btn))
+        
+        wrapper.add_child(btn)
+        hand_container.add_child(wrapper)
 
 func render_submissions(submissions: Array):
     for child in submissions_container.get_children():
@@ -220,25 +371,56 @@ func render_submissions(submissions: Array):
                  txt = "Error"
         
         btn.text = txt
-        btn.custom_minimum_size = Vector2(160, 100)
+        btn.custom_minimum_size = Vector2(160, 220)
         btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-        btn.add_theme_font_size_override("font_size", 11)
+        btn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+        btn.add_theme_font_size_override("font_size", 14)
         
-        # Stylize white card for submission
-        var sb = StyleBoxFlat.new()
-        sb.bg_color = Color.WHITE
-        sb.set_border_width_all(1)
-        sb.border_color = Color.GRAY
-        btn.add_theme_stylebox_override("normal", sb)
+        # Style
+        var style_normal = get_card_style(Color.WHITE)
+        var style_hover = get_card_style(Color("#F5F5F5"))
+        var style_pressed = get_card_style(Color("#BDC3C7"))
+        
+        btn.add_theme_stylebox_override("normal", style_normal)
+        btn.add_theme_stylebox_override("hover", style_hover)
+        btn.add_theme_stylebox_override("pressed", style_pressed)
+        
         btn.add_theme_color_override("font_color", Color.BLACK)
+        btn.add_theme_color_override("font_hover_color", Color.BLACK)
+        btn.add_theme_color_override("font_pressed_color", Color.BLACK)
         
         if is_czar and status_label.text.contains("SELECTION"):
             btn.disabled = false
+            btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
             btn.pressed.connect(_on_winner_picked.bind(sub.get("player_id")))
+            # Czar Interaction: Hover to see filled text
+            btn.mouse_entered.connect(_on_submission_hover.bind(sub))
+            btn.mouse_exited.connect(_reset_black_card)
         else:
             btn.disabled = true
+            btn.mouse_default_cursor_shape = Control.CURSOR_ARROW
             
         submissions_container.add_child(btn)
+
+func _on_card_hover(btn: Button):
+    btn.position.y = -40
+    btn.z_index = 10
+
+func _on_card_exit(btn: Button):
+    btn.position.y = 0
+    btn.z_index = 0
+
+func _on_submission_hover(sub: Dictionary):
+    var text = sub.get("filled_text", "")
+    if text == "": return
+    # Replace brackets with color tags
+    text = text.replace("[", "[color=#F1C40F]")
+    text = text.replace("]", "[/color]")
+    black_card_label.text = "[center]" + text + "[/center]"
+
+func _reset_black_card():
+    var text = current_black_card_data.get("text", "")
+    black_card_label.text = "[center]" + text + "[/center]"
 
 func _on_winner_picked(player_id: String):
     send_message("pick_winner", {"player_id": player_id})
