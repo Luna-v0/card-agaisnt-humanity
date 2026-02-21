@@ -1,0 +1,23 @@
+[project]
+name = "cah-backend"
+version = "0.1.0"
+description = "Backend for Cards Against Humanity game"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "websockets",
+]
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.2",
+]

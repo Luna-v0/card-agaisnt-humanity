@@ -1,0 +1,121 @@
+[gd_scene load_steps=3 format=3 uid="uid://df67v2y241h37"]
+
+[ext_resource type="Script" path="res://Main.gd" id="1_4004c"]
+[ext_resource type="Script" path="res://WebSocketClient.gd" id="2_ws"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4004c")
+
+[node name="WebSocketClient" type="Node" parent="."]
+script = ExtResource("2_ws")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="LoginContainer" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="NameInput" type="LineEdit" parent="VBoxContainer/LoginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter your name..."
+
+[node name="JoinButton" type="Button" parent="VBoxContainer/LoginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Join Game"
+
+[node name="GameContainer" type="VBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 5
+
+[node name="BlackCardLabel" type="Label" parent="VBoxContainer/GameContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Black Card Question Here"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="HandLabel" type="Label" parent="VBoxContainer/GameContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Your Hand:"
+
+[node name="HandContainer" type="GridContainer" parent="VBoxContainer/GameContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 6
+
+[node name="SubmissionLabel" type="Label" parent="VBoxContainer/GameContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Submissions (Czar's Turn):"
+
+[node name="SubmissionsContainer" type="GridContainer" parent="VBoxContainer/GameContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 6
+
+[node name="BottomUI" type="HBoxContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="PlayerList" type="ItemList" parent="VBoxContainer/BottomUI"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/BottomUI"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer/BottomUI/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Status: Waiting for players..."
+
+[node name="StartButton" type="Button" parent="VBoxContainer/BottomUI/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Start Round"
+
+[node name="MessageLog" type="TextEdit" parent="VBoxContainer/BottomUI/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 10
+editable = false
+wrap_mode = 1

@@ -1,0 +1,13 @@
+Godot Engine v4.6.stable.arch_linux - https://godotengine.org
+Vulkan 1.4.325 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4060 Ti
+ERROR: Unable to create shader cache directory ParticlesCopyShaderRD/1d6ad1e77daa693c966c37873bef5b778c16583ea96e9faa4a4d7e8fd992f0cd at user://shader_cache.
+   at: _initialize_cache (servers/rendering/renderer_rd/shader_rd.cpp:883)
+
+SCRIPT ERROR: Parse Error: Could not find type "WebSocketClient" in the current scope.
+          at: GDScript::reload (res://Main.gd:3)
+SCRIPT ERROR: Parse Error: Identifier "False" not declared in the current scope.
+          at: GDScript::reload (res://Main.gd:20)
+ERROR: Failed to load script "res://Main.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+ERROR: Error opening file 'res://icon.svg'.
+   at: load_image (core/io/image_loader.cpp:89)
