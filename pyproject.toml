@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Backend for Cards Against Humanity game"
 dependencies = [
     "fastapi",
+    "pandas>=2.3.3",
     "uvicorn",
     "websockets",
 ]
